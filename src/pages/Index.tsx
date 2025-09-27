@@ -73,8 +73,12 @@ const Index = () => {
 
       if (participant) {
         navigate(`/chat/${participant.chat_id}`);
+        return true;
+      } else {
+        // No chat found - user authenticated but no chat assigned
+        alert('No chat assigned to this user. Please contact the owner to assign you to a chat.');
+        return false;
       }
-      return true;
     }
     return false;
   };
