@@ -28,7 +28,7 @@ jobs:
         run: bun add -g @capacitor/cli
 
       - name: Update Capacitor config for build
-        run:
+        run: |
           cat > capacitor.config.ts << 'EOF'
           import { CapacitorConfig } from '@capacitor/cli';
           
