@@ -2,6 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    /* Color palette */
+    --primary: 270 95% 75%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 270 95% 85%;
+    
+    --secondary: 220 13% 91%;
+    --secondary-foreground: 220 9% 46%;
+    
+    --accent: 220 13% 91%;
+    --accent-foreground: 220 9% 9%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --muted: 220 13% 91%;
+    --muted-foreground: 220 9% 46%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 220 9% 9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 9% 9%;
+    
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 270 95% 75%;
+    
+    --background: 0 0% 100%;
+    --foreground: 220 9% 9%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(270 95% 75%), hsl(270 95% 85%));
+    --gradient-dark: linear-gradient(135deg, hsl(220 9% 9%), hsl(220 9% 15%));
+    --gradient-glow: radial-gradient(circle, hsl(270 95% 75% / 0.3), transparent);
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(270 95% 75% / 0.4);
+    --shadow-elegant: 0 10px 30px -10px hsl(270 95% 75% / 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --primary: 270 95% 75%;
+    --primary-foreground: 220 9% 9%;
+    
+    --secondary: 220 9% 15%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --accent: 220 9% 15%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --muted: 220 9% 15%;
+    --muted-foreground: 220 9% 60%;
+    
+    --card: 220 9% 9%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 220 9% 9%;
+    --popover-foreground: 0 0% 98%;
+    
+    --border: 220 9% 15%;
+    --input: 220 9% 15%;
+    --ring: 270 95% 75%;
+    
+    --background: 220 9% 9%;
+    --foreground: 0 0% 98%;
+  }
+}
+
+@layer components {
+  .btn-glow {
+    @apply relative overflow-hidden transition-all duration-300;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .btn-glow::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: var(--gradient-glow);
+  }
+  
+  .btn-glow:hover::before {
+    @apply opacity-100;
+  }
+  
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 20px hsl(270 95% 75% / 0.4);
+  }
+  100% {
+    box-shadow: 0 0 40px hsl(270 95% 75% / 0.8);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
