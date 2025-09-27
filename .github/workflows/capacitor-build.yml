@@ -27,13 +27,13 @@ jobs:
       - name: Install Capacitor CLI
         run: bun add -g @capacitor/cli
 
-      - name: Update Capacitor config for build
+            - name: Update Capacitor config for build
         run: |
           cat > capacitor.config.ts << 'EOF'
           import { CapacitorConfig } from '@capacitor/cli';
           
           const config: CapacitorConfig = {
-            appId: 'app.lovable.5fd06942f75a40ab9e3b0c0633dc498e',
+            appId: 'com.lovable.charmlinkscribe',
             appName: 'charm-link-scribe',
             webDir: 'dist',
             bundledWebRuntime: false
