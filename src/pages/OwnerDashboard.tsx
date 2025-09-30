@@ -68,6 +68,44 @@ const OwnerDashboard = () => {
     if (data) setUsers(data);
   };
 
+  // Ensure each girlfriend has a private 1:1 DM with the Owner
+  const getOrCreateDm = async (userId: string, displayName?: string): Promise<string> => {
+    const { data: existing } = await supabase
+      .from('chat_participants')
+      .select('chat_id')
+      .eq('user_id', userId)
+      .eq('role', 'girlfriend')
+      .maybeSingle();
+
+    if (existing?.chat_id) {
+      return existing.chat_id as string;
+    }
+
+    const { data: chat, error: chatErr } = await supabase
+      .from('chats')
+      .insert([{ owner_id: currentUser, title: displayName || 'Direct Message' }])
+      .select()
+      .single();
+
+    if (chatErr || !chat) {
+      throw new Error('Failed to create chat');
+    }
+
+    // Add participants
+    await supabase.from('chat_participants').insert([
+      { chat_id: chat.id, owner_id: currentUser, role: 'owner' },
+    ]);
+
+    await supabase.from('chat_participants').insert([
+      { chat_id: chat.id, user_id: userId, role: 'girlfriend' },
+    ]);
+
+    // Refresh chats list
+    await loadChats();
+
+    return chat.id as string;
+  };
+
   const createUser = async () => {
     if (!newUser.username || !newUser.displayName || !newUser.password) {
       toast({
@@ -78,36 +116,42 @@ const OwnerDashboard = () => {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(newUser.password, 10);
-    
-    const { data, error } = await supabase
-      .from('app_users')
-      .insert([{
-        owner_id: currentUser,
-        username: newUser.username,
-        display_name: newUser.displayName,
-        password_hash: hashedPassword
-      }])
-      .select()
-      .single();
+    try {
+      const hashedPassword = await bcrypt.hash(newUser.password, 10);
+      
+      const { data: created, error } = await supabase
+        .from('app_users')
+        .insert([{
+          owner_id: currentUser,
+          username: newUser.username,
+          display_name: newUser.displayName,
+          password_hash: hashedPassword
+        }])
+        .select()
+        .single();
 
-    if (error) {
+      if (error || !created) {
+        throw error || new Error('Failed to create user');
+      }
+
+      // Auto-create a private 1:1 DM with the owner
+      await getOrCreateDm(created.id, created.display_name);
+
+      toast({
+        title: "Success",
+        description: "User and private DM created"
+      });
+
+      setNewUser({ username: '', displayName: '', password: '' });
+      setIsCreateUserOpen(false);
+      await Promise.all([loadUsers(), loadChats()]);
+    } catch (e) {
       toast({
         title: "Error",
         description: "Failed to create user",
         variant: "destructive"
       });
-      return;
     }
-
-    toast({
-      title: "Success",
-      description: "User created successfully"
-    });
-
-    setNewUser({ username: '', displayName: '', password: '' });
-    setIsCreateUserOpen(false);
-    loadUsers();
   };
 
   const createChat = async () => {
@@ -302,16 +346,16 @@ const OwnerDashboard = () => {
                           </p>
                         </div>
                         <div className="flex gap-2">
-                          {chats.map((chat) => (
-                            <Button
-                              key={chat.id}
-                              size="sm"
-                              variant="outline"
-                              onClick={() => assignUserToChat(user.id, chat.id)}
-                            >
-                              Add to {chat.title}
-                            </Button>
-                          ))}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              const chatId = await getOrCreateDm(user.id, user.display_name);
+                              navigate(`/chat/${chatId}`);
+                            }}
+                          >
+                            Open DM
+                          </Button>
                         </div>
                       </div>
                     </motion.div>

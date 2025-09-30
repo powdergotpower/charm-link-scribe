@@ -75,9 +75,25 @@ const Index = () => {
         navigate(`/chat/${participant.chat_id}`);
         return true;
       } else {
-        // No chat found - user authenticated but no chat assigned
-        alert('No chat assigned to this user. Please contact the owner to assign you to a chat.');
-        return false;
+        // Auto-create a private DM with the owner
+        const { data: chat, error: chatErr } = await supabase
+          .from('chats')
+          .insert([{ owner_id: user.owner_id, title: user.display_name }])
+          .select()
+          .single();
+
+        if (chatErr || !chat) return false;
+
+        await supabase
+          .from('chat_participants')
+          .insert([{ chat_id: chat.id, owner_id: user.owner_id, role: 'owner' }]);
+
+        await supabase
+          .from('chat_participants')
+          .insert([{ chat_id: chat.id, user_id: user.id, role: 'girlfriend' }]);
+
+        navigate(`/chat/${chat.id}`);
+        return true;
       }
     }
     return false;
